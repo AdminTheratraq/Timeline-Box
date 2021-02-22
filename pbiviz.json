@@ -1,7 +1,7 @@
 {
     "visual": {
-        "name": "timeline",
-        "displayName": "Timeline",
+        "name": "timeline box",
+        "displayName": "Timeline Box",
         "guid": "timelineD7EACB3A04E64A5FA9D86F6E035F3523",
         "visualClassName": "Visual",
         "version": "1.0.0",
