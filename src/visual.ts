@@ -158,33 +158,21 @@ export class Visual implements IVisual {
 
         let timelineData = Visual.CONVERTER(options.dataViews[0], this.host);
         timelineData = timelineData.slice(0, 100);
-        let totalRecords = timelineData.length;
-        if (totalRecords) {
-            let firstRow = timelineData[0];
-            if (!firstRow.Company || !firstRow.Type || !firstRow.Description || !firstRow.Date) {
-                this.initLoad = false;
-            }
+
+        let minDate, maxDate, currentDate;
+        let timelineLocalData: TimelineData[] = [];
+        currentDate = new Date();
+
+        if (timelineData.length > 0) {
+            minDate = new Date(currentDate.getFullYear() - 1, 0, 1);
+            timelineLocalData = timelineData.map<TimelineData>((d) => { if (d.Date.getFullYear() >= minDate.getFullYear()) { return d;} }).filter(e => e);
+            maxDate = new Date(currentDate.getFullYear() + 8, 0, 1);
+            timelineLocalData = timelineLocalData.map<TimelineData>((d) => { if (d.Date.getFullYear() <= maxDate.getFullYear()) { return d; } }).filter(e => e);
         }
 
-        let minDate, maxDate;
-        if (this.initLoad === false) {
-            minDate = new Date();
-            maxDate = minDate;
-
-            let minYear = minDate.getFullYear();
-            let minMonth = minDate.getMonth();
-            let minDay = minDate.getDate();
-            minDate = new Date(minYear - 2, 0, 1);
-
-            let maxYear = maxDate.getFullYear();
-            let maxMonth = maxDate.getMonth();
-            let maxDay = maxDate.getDate();
-            maxDate = new Date(maxYear + 4, 0, 1);
-
-            timelineData = timelineData.filter((t, i) => t.Date.getTime() >= minDate.getTime() && t.Date.getTime() <= maxDate.getTime());
-            this.initLoad = true;
-        }
-        else {
+        if (timelineLocalData.length > 0) {
+            timelineData = timelineLocalData;
+          } else if (timelineLocalData.length == 0) {
             minDate = new Date(Math.min.apply(null, timelineData.map(d => d.Date)));
             maxDate = new Date(Math.max.apply(null, timelineData.map(d => d.Date)));
             minDate = new Date(minDate.getFullYear(), 0, 1);
