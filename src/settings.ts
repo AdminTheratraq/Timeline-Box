@@ -31,8 +31,21 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
 export class VisualSettings extends DataViewObjectsParser {
   public dataPoint: DataPointSettings = new DataPointSettings();
+  public legendColors: LegendColorSettings = new LegendColorSettings();
+  public displayYears: DisplayYearsSettings = new DisplayYearsSettings();
 }
 export class DataPointSettings {
   public layout: string = "";
+}
+
+export class LegendColorSettings {
+  public ClinicalTrail: string = "#DD7309";
+  public Regulatory: string = "#C00000";
+  public Commercial: string = "#93AF00";
+}
+
+export class DisplayYearsSettings {
+  public PreviousYear: number = 1;
+  public FutureYear: number = 8;
 }
 

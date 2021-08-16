@@ -131,6 +131,58 @@
                     }
                 }
             }
+        },
+        "legendColors":{
+            "displayName": "LegendColors",
+            "properties": {
+                "ClinicalTrail": {
+                    "displayName": "Clinical Trials",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "Regulatory": {
+                    "displayName": "Regulatory",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "Commercial": {
+                    "displayName": "Commercial",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "displayYears":{
+            "displayName": "Display Years",
+            "properties": {
+                "PreviousYear": {
+                    "displayName": "Previous Year",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "FutureYear": {
+                    "displayName": "Future Year",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
         }
     },
     "sorting": {

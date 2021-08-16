@@ -66,6 +66,7 @@ export class Visual implements IVisual {
     private header: d3.Selection<HTMLElement, any, any, any>;
     private footer: d3.Selection<HTMLElement, any, any, any>;
     private svg: d3.Selection<SVGElement, any, any, any>;
+    private tooltip: d3.Selection<HTMLElement, any, any, any>;
     private margin = { top: 50, right: 40, bottom: 50, left: 40 };
     private settings: VisualSettings;
     private host: IVisualHost;
@@ -80,6 +81,7 @@ export class Visual implements IVisual {
         this.header = d3.select(options.element).append("div");
         this.footer = d3.select(options.element).append("div");
         this.svg = d3.select(options.element).append('svg');
+        this.tooltip = d3.select(options.element).append("div");
         this.host = options.host;
         this.events = options.host.eventService;
         this.selectionManager = options.host.createSelectionManager();
@@ -128,11 +130,10 @@ export class Visual implements IVisual {
         let minDate, maxDate, currentDate;
         let timelineLocalData: TimelineData[] = [];
         currentDate = new Date();
-
         if (timelineData.length > 0) {
-            minDate = new Date(currentDate.getFullYear() - 1, 0, 1);
+            minDate = new Date(currentDate.getFullYear() - this.settings.displayYears.PreviousYear, 0, 1);
             timelineLocalData = timelineData.map<TimelineData>((d) => { if (d.Date.getFullYear() >= minDate.getFullYear()) { return d;} }).filter(e => e);
-            maxDate = new Date(currentDate.getFullYear() + 8, 0, 1);
+            maxDate = new Date(currentDate.getFullYear() + this.settings.displayYears.FutureYear, 0, 1);
             timelineLocalData = timelineLocalData.map<TimelineData>((d) => { if (d.Date.getFullYear() <= maxDate.getFullYear()) { return d; } }).filter(e => e);
         }
 
@@ -297,13 +298,13 @@ export class Visual implements IVisual {
             })
             .style('fill', (d) => {
                 if (d.Type === 'Regulatory') {
-                    return '#C00000';
+                    return this.settings.legendColors.Regulatory;
                 }
                 else if (d.Type === 'Commercial') {
-                    return '#93AF00';
+                    return this.settings.legendColors.Commercial;
                 }
                 else if (d.Type === 'Clinical Trials') {
-                    return '#DD7309';
+                    return this.settings.legendColors.ClinicalTrail;
                 }
             });
     }
@@ -317,24 +318,22 @@ export class Visual implements IVisual {
             .enter()
             .append("path")
             .attr('d', triangle)
-            .attr('class', (d, i) => {
-                let arrowClass;
-                if (d.Type === 'Regulatory') {
-                    arrowClass = 'arrow-regulatory';
-                }
-                else if (d.Type === 'Commercial') {
-                    arrowClass = 'arrow-commercial';
-                }
-                else if (d.Type === 'Clinical Trials') {
-                    arrowClass = 'arrow-clinical-trails';
-                }
-                return arrowClass;
-            })
             .attr("title", (d) => {
                 return sanitizeHtml(d.Description) + '(' + d.Date + ')';
             })
             .attr("width", 100)
             .attr("height", 70)
+            .style('fill', (d) => {
+                if (d.Type === 'Regulatory') {
+                    return this.settings.legendColors.Regulatory;
+                }
+                else if (d.Type === 'Commercial') {
+                    return this.settings.legendColors.Commercial;
+                }
+                else if (d.Type === 'Clinical Trials') {
+                    return this.settings.legendColors.ClinicalTrail;
+                }
+            })
             .attr('transform', (d, i) => {
                 let yscale, rotate = '';
                 if ((i % 2) === 0) {
@@ -354,27 +353,19 @@ export class Visual implements IVisual {
             .enter()
             .append("g")
             .attr('class', (d, i) => {
-                if (d.Type === 'Regulatory') {
-                    return 'rect regulatory';
-                }
-                else if (d.Type === 'Commercial') {
-                    return 'rect commercial';
-                }
-                else if (d.Type === 'Clinical Trials') {
-                    return 'rect clinical-trails';
-                }
+                if (d.Type === 'Regulatory') { return 'rect regulatory'; } 
+                else if (d.Type === 'Commercial') { return 'rect commercial'; }
+                else if (d.Type === 'Clinical Trials') { return 'rect clinical-trails'; }
             })
-            .attr("title", (d) => {
-                return sanitizeHtml(d.Description) + '(' + d.Date + ')';
+            .style('fill', (d) => {
+                if (d.Type === 'Regulatory') { return this.settings.legendColors.Regulatory; }
+                else if (d.Type === 'Commercial') { return this.settings.legendColors.Commercial; }
+                else if (d.Type === 'Clinical Trials') { return this.settings.legendColors.ClinicalTrail; }
             })
-            .attr("width", () => {
-                return 100;
-            })
-            .attr("height", () => {
-                return 70;
-            })
-            .attr('fill', '#ffffff')
-            .attr('transform', (d, i) => {
+            .attr("title", (d) => { return sanitizeHtml(d.Description) + '(' + d.Date + ')'; })
+            .attr("width", () => { return 100; })
+            .attr("height", () => { return 70; })
+            .attr('transform', (d, i) => { 
                 let y;
                 if ((i % 2) === 0) {
                     let count = i / 2;
@@ -394,41 +385,60 @@ export class Visual implements IVisual {
                 return 'translate(' + (_self.xScale(d.Date) - 25) + ' ' + y + ')';
             });
 
-
         gbox.append('a')
-            .attr('xlink:href', (d, i) => {
-                return d.DocumentLink;
-            })
+            .attr('xlink:href', (d, i) => { return d.DocumentLink; })
             .attr("target", "_blank")
             .append("rect")
-            .attr("width", () => {
-                return 100;
-            })
-            .attr("height", () => {
-                return 70;
-            })
-            .attr('fill', '#ffffff')
-            .on('click', (e) => {
-                _self.host.launchUrl(e.DocumentLink);
-            });
+            .attr("width", () => { return 100; })
+            .attr("height", () => { return 70; })
+            .on('click', (e) => { _self.host.launchUrl(e.DocumentLink); });
 
         gbox.append('a')
-            .attr('xlink:href', (d, i) => {
-                return d.DocumentLink;
-            })
+            .attr('xlink:href', (d, i) => { return d.DocumentLink; })
             .attr("target", "_blank")
             .append("text")
-            .text((d) => {
-                return _self.extractContent(sanitizeHtml(d.Description));
-            })
+            .text((d) => { return _self.extractContent(sanitizeHtml(d.Description)); })
             .attr('x', '5')
             .attr('y', '0')
             .attr('fill', '#ffffff')
-            .attr('transform', 'translate(0,20)')
+            .attr('transform', 'translate(10,30)')
             .call(this.wrap, 90)
-            .on('click', (e) => {
-                _self.host.launchUrl(e.DocumentLink);
-            });
+            .on('click', (e) => { _self.host.launchUrl(e.DocumentLink); });
+        
+            this.tooltip
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px");
+
+            let self = this;
+
+        gbox.on('mouseover', (d) => {
+            self.tooltip.style("opacity", 1);
+        })
+        .on('mousemove', (d: TimelineData) => {
+            var html = '';
+                var dateHtml = '<div>' + (d.Date.getMonth() + 1) + '/' + (d.Date.getDate()) + '/' + (d.Date.getFullYear()) + '</div>';
+                if (d.Type === "Regulatory") {
+                  html = dateHtml + '<div>' + sanitizeHtml(d.Company) + '</div>' + '<div>' + sanitizeHtml(d.Description) + '</div>';
+                }
+                else if (d.Type === "Commercial") {
+                  html = dateHtml + '<div>' + sanitizeHtml(d.Company) + '</div>' + '<div>' + sanitizeHtml(d.Description) + '</div>';
+                } else if (d.Type === "Clinical Trials") {
+                  html = dateHtml + '<div>' + sanitizeHtml(d.Company) + '</div>' + '<div>' + + sanitizeHtml(d.Description) + '</div>';
+                }
+                self.tooltip.html(html).style("left", (d3.event.pageX + 20) + "px").style("top", (d3.event.pageY) + "px");
+        })
+        .on('mouseleave', (d) => {
+            self.tooltip.style("opacity", 0);
+        });
+
+        gbox.on("mouseenter", function () { d3.select(this).raise(); });
+
         this.renderLegend(gWidth, gHeight);
     }
 
@@ -461,7 +471,7 @@ export class Visual implements IVisual {
             .attr("height", () => {
                 return 35;
             })
-            .attr('fill', '#DD7309');
+            .attr('fill', this.settings.legendColors.ClinicalTrail);
 
         legendClinical.append('text')
             .text('Clinical Trials')
@@ -475,7 +485,7 @@ export class Visual implements IVisual {
             .attr("height", () => {
                 return 35;
             })
-            .attr('fill', '#C00000');
+            .attr('fill', this.settings.legendColors.Regulatory);
 
         legendRegulatory.append('text')
             .text('Regulatory')
@@ -488,7 +498,7 @@ export class Visual implements IVisual {
             .attr("height", () => {
                 return 35;
             })
-            .attr('fill', '#93AF00');
+            .attr('fill', this.settings.legendColors.Commercial);
 
         legendCommercial.append('text')
             .text('Commercial')
