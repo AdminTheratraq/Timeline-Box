@@ -125,7 +125,17 @@ export class Visual implements IVisual {
           });
 
         let timelineData = Visual.CONVERTER(options.dataViews[0], this.host);
-        timelineData = timelineData.slice(0, 100);
+
+        timelineData = timelineData.sort((a,b) => 
+        {
+            if (a.Date && b.Date) {
+                return a.Date.getDate() - b.Date.getDate()
+            } else {
+                return -1;
+            }
+        });
+        
+        timelineData = timelineData.slice(0, this.settings.dataPoint.maxdata);
 
         let minDate, maxDate, currentDate;
         let timelineLocalData: TimelineData[] = [];
@@ -321,7 +331,7 @@ export class Visual implements IVisual {
             .attr("title", (d) => {
                 return sanitizeHtml(d.Description) + '(' + d.Date + ')';
             })
-            .attr("width", 100)
+            .attr("width", 110)
             .attr("height", 70)
             .style('fill', (d) => {
                 if (d.Type === 'Regulatory') {
@@ -363,7 +373,7 @@ export class Visual implements IVisual {
                 else if (d.Type === 'Clinical Trials') { return this.settings.legendColors.ClinicalTrail; }
             })
             .attr("title", (d) => { return sanitizeHtml(d.Description) + '(' + d.Date + ')'; })
-            .attr("width", () => { return 100; })
+            .attr("width", () => { return 110; })
             .attr("height", () => { return 70; })
             .attr('transform', (d, i) => { 
                 let y;
@@ -382,14 +392,14 @@ export class Visual implements IVisual {
                         y = _self.yScale(55);
                     }
                 }
-                return 'translate(' + (_self.xScale(d.Date) - 25) + ' ' + y + ')';
+                return 'translate(' + (_self.xScale(d.Date) - 33) + ' ' + y + ')';
             });
 
         gbox.append('a')
             .attr('xlink:href', (d, i) => { return d.DocumentLink; })
             .attr("target", "_blank")
             .append("rect")
-            .attr("width", () => { return 100; })
+            .attr("width", () => { return 110; })
             .attr("height", () => { return 70; })
             .on('click', (e) => { _self.host.launchUrl(e.DocumentLink); });
 
@@ -429,7 +439,7 @@ export class Visual implements IVisual {
                 else if (d.Type === "Commercial") {
                   html = dateHtml + '<div>' + sanitizeHtml(d.Company) + '</div>' + '<div>' + sanitizeHtml(d.Description) + '</div>';
                 } else if (d.Type === "Clinical Trials") {
-                  html = dateHtml + '<div>' + sanitizeHtml(d.Company) + '</div>' + '<div>' + + sanitizeHtml(d.Description) + '</div>';
+                  html = dateHtml + '<div>' + sanitizeHtml(d.Company) + '</div>' + '<div>' + sanitizeHtml(d.Description) + '</div>';
                 }
                 self.tooltip.html(html).style("left", (d3.event.pageX + 20) + "px").style("top", (d3.event.pageY) + "px");
         })

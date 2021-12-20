@@ -40,6 +40,11 @@
         {
             "table": {
                 "rows": {
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 2000
+                        }
+                    },
                     "select": [
                         {
                             "for": {
@@ -128,6 +133,12 @@
                     "displayName": "Layout",
                     "type": {
                         "text": true
+                    }
+                },
+                "maxdata": {
+                    "displayName": "Max Data",
+                    "type": {
+                        "text":true
                     }
                 }
             }

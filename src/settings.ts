@@ -36,6 +36,7 @@ export class VisualSettings extends DataViewObjectsParser {
 }
 export class DataPointSettings {
   public layout: string = "";
+  public maxdata: number = 1000;
 }
 
 export class LegendColorSettings {
