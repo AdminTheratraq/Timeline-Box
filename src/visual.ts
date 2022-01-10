@@ -75,6 +75,7 @@ export class Visual implements IVisual {
     private xScale: d3.ScaleTime<number, number>;
     private yScale: d3.ScaleLinear<number, number>;
     private selectionManager: ISelectionManager;
+    private isValidEventDate: boolean;
 
     constructor(options: VisualConstructorOptions) {
         this.target = d3.select(options.element);
@@ -156,22 +157,39 @@ export class Visual implements IVisual {
             maxDate = new Date(maxDate.getFullYear() + 1, 0, 1);
         }
 
-        this.renderHeaderAndFooter(timelineData);
-        this.renderXandYAxis(minDate, maxDate, gWidth, gHeight);
-        this.renderTitle(vpWidth, gWidth);
-        this.renderLine(timelineData, gHeight);
-        this.renderArrow(timelineData);
-        this.renderBox(timelineData, gWidth, gHeight);
-        this.svg.append('rect')
-            .attr('class', 'border-rect')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', vpWidth)
-            .attr('height', vpHeight + 10)
-            .attr('stroke-width', '2px')
-            .attr('stroke', '#333')
-            .attr('fill', 'transparent');
-        this.events.renderingFinished(options);
+        this.isValidEventDate = true;
+
+        for (let i=0; i< timelineData.length - 1; i++) {
+            if (timelineData[i].Date.toString() === "Invalid Date") {
+                this.isValidEventDate = false;
+                break;
+            } else if (timelineData[i].Date) {
+              if (isNaN(timelineData[i].Date.getTime())) {
+                this.isValidEventDate = false;
+                break;
+              }
+            }
+          }
+          
+        if (this.isValidEventDate === true) {
+
+            this.renderHeaderAndFooter(timelineData);
+            this.renderXandYAxis(minDate, maxDate, gWidth, gHeight);
+            this.renderTitle(vpWidth, gWidth);
+            this.renderLine(timelineData, gHeight);
+            this.renderArrow(timelineData);
+            this.renderBox(timelineData, gWidth, gHeight);
+            this.svg.append('rect')
+                .attr('class', 'border-rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', vpWidth)
+                .attr('height', vpHeight + 10)
+                .attr('stroke-width', '2px')
+                .attr('stroke', '#333')
+                .attr('fill', 'transparent');
+            this.events.renderingFinished(options);
+        }
     }
 
     private renderHeaderAndFooter(timelineData: TimelineData[]) {
@@ -264,6 +282,7 @@ export class Visual implements IVisual {
 
     private renderLine(timelineData: TimelineData[], gHeight) {
         let _self = this;
+        
         this.svg.selectAll(".line")
             .data(timelineData)
             .enter()
@@ -472,7 +491,6 @@ export class Visual implements IVisual {
         gLegend.append('text')
             .text('Code:')
             .attr('transform', 'translate(0,35)');
-
 
         legendClinical.append("rect")
             .attr("width", () => {
