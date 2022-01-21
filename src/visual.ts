@@ -100,95 +100,85 @@ export class Visual implements IVisual {
         let vpWidth = options.viewport.width;
         let vpHeight = options.viewport.height;
 
-        if (this.settings.dataPoint.layout.toLowerCase() === "header" || this.settings.dataPoint.layout.toLowerCase() === "footer") {
-            vpHeight = options.viewport.height - 105;
-        }
-
-        let _this = this;
-        this.svg.attr('height', vpHeight);
-        this.svg.attr('width', vpWidth);
-
-        let gHeight = vpHeight - this.margin.top - this.margin.bottom;
-        let gWidth = vpWidth - this.margin.left - this.margin.right;
-
-        this.target.on("contextmenu", () => {
-            const mouseEvent: MouseEvent = <MouseEvent> d3.event;
-            const eventTarget: any = mouseEvent.target;
-            let dataPoint: any = d3.select(eventTarget).datum();
-            this.selectionManager.showContextMenu(
-              dataPoint ? dataPoint.selectionId : {},
-              {
-                x: mouseEvent.clientX,
-                y: mouseEvent.clientY,
-              }
-            );
-            mouseEvent.preventDefault();
-          });
-
-        let timelineData = Visual.CONVERTER(options.dataViews[0], this.host);
-
-        timelineData = timelineData.sort((a,b) => 
-        {
-            if (a.Date && b.Date) {
-                return a.Date.getDate() - b.Date.getDate()
-            } else {
-                return -1;
+        if (options.viewport.height >= 190) {
+            if (this.settings.dataPoint.layout.toLowerCase() === "header" || this.settings.dataPoint.layout.toLowerCase() === "footer") {
+                vpHeight = options.viewport.height - 105;
             }
-        });
-        
-        timelineData = timelineData.slice(0, this.settings.dataPoint.maxdata);
-
-        let minDate, maxDate, currentDate;
-        let timelineLocalData: TimelineData[] = [];
-        currentDate = new Date();
-        if (timelineData.length > 0) {
-            minDate = new Date(currentDate.getFullYear() - this.settings.displayYears.PreviousYear, 0, 1);
-            timelineLocalData = timelineData.map<TimelineData>((d) => { if (d.Date.getFullYear() >= minDate.getFullYear()) { return d;} }).filter(e => e);
-            maxDate = new Date(currentDate.getFullYear() + this.settings.displayYears.FutureYear, 0, 1);
-            timelineLocalData = timelineLocalData.map<TimelineData>((d) => { if (d.Date.getFullYear() <= maxDate.getFullYear()) { return d; } }).filter(e => e);
-        }
-
-        if (timelineLocalData.length > 0) {
-            timelineData = timelineLocalData;
-          } else if (timelineLocalData.length == 0) {
-            minDate = new Date(Math.min.apply(null, timelineData.map(d => d.Date)));
-            maxDate = new Date(Math.max.apply(null, timelineData.map(d => d.Date)));
-            minDate = new Date(minDate.getFullYear(), 0, 1);
-            maxDate = new Date(maxDate.getFullYear() + 1, 0, 1);
-        }
-
-        this.isValidEventDate = true;
-
-        for (let i=0; i< timelineData.length - 1; i++) {
-            if (timelineData[i].Date.toString() === "Invalid Date") {
-                this.isValidEventDate = false;
-                break;
-            } else if (timelineData[i].Date) {
-              if (isNaN(timelineData[i].Date.getTime())) {
-                this.isValidEventDate = false;
-                break;
-              }
+            let _this = this;
+            this.svg.attr('height', vpHeight);
+            this.svg.attr('width', vpWidth);
+            let gHeight = vpHeight - this.margin.top - this.margin.bottom;
+            let gWidth = vpWidth - this.margin.left - this.margin.right;
+            this.target.on("contextmenu", () => {
+                const mouseEvent: MouseEvent = <MouseEvent> d3.event;
+                const eventTarget: any = mouseEvent.target;
+                let dataPoint: any = d3.select(eventTarget).datum();
+                this.selectionManager.showContextMenu(
+                  dataPoint ? dataPoint.selectionId : {},
+                  {
+                    x: mouseEvent.clientX,
+                    y: mouseEvent.clientY,
+                  }
+                );
+                mouseEvent.preventDefault();
+              });
+            let timelineData = Visual.CONVERTER(options.dataViews[0], this.host);
+            timelineData = timelineData.sort((a,b) => 
+            {
+                if (a.Date && b.Date) {
+                    return a.Date.getDate() - b.Date.getDate()
+                } else {
+                    return -1;
+                }
+            });
+            timelineData = timelineData.slice(0, this.settings.dataPoint.maxdata);
+            let minDate, maxDate, currentDate;
+            let timelineLocalData: TimelineData[] = [];
+            currentDate = new Date();
+            if (timelineData.length > 0) {
+                minDate = new Date(currentDate.getFullYear() - this.settings.displayYears.PreviousYear, 0, 1);
+                timelineLocalData = timelineData.map<TimelineData>((d) => { if (d.Date.getFullYear() >= minDate.getFullYear()) { return d;} }).filter(e => e);
+                maxDate = new Date(currentDate.getFullYear() + this.settings.displayYears.FutureYear, 0, 1);
+                timelineLocalData = timelineLocalData.map<TimelineData>((d) => { if (d.Date.getFullYear() <= maxDate.getFullYear()) { return d; } }).filter(e => e);
             }
-          }
-          
-        if (this.isValidEventDate === true) {
-
-            this.renderHeaderAndFooter(timelineData);
-            this.renderXandYAxis(minDate, maxDate, gWidth, gHeight);
-            this.renderTitle(vpWidth, gWidth);
-            this.renderLine(timelineData, gHeight);
-            this.renderArrow(timelineData);
-            this.renderBox(timelineData, gWidth, gHeight);
-            this.svg.append('rect')
-                .attr('class', 'border-rect')
-                .attr('x', 0)
-                .attr('y', 0)
-                .attr('width', vpWidth)
-                .attr('height', vpHeight + 10)
-                .attr('stroke-width', '2px')
-                .attr('stroke', '#333')
-                .attr('fill', 'transparent');
-            this.events.renderingFinished(options);
+            if (timelineLocalData.length > 0) {
+                timelineData = timelineLocalData;
+              } else if (timelineLocalData.length == 0) {
+                minDate = new Date(Math.min.apply(null, timelineData.map(d => d.Date)));
+                maxDate = new Date(Math.max.apply(null, timelineData.map(d => d.Date)));
+                minDate = new Date(minDate.getFullYear(), 0, 1);
+                maxDate = new Date(maxDate.getFullYear() + 1, 0, 1);
+            }
+            this.isValidEventDate = true;
+            for (let i=0; i< timelineData.length - 1; i++) {
+                if (timelineData[i].Date.toString() === "Invalid Date") {
+                    this.isValidEventDate = false;
+                    break;
+                } else if (timelineData[i].Date) {
+                  if (isNaN(timelineData[i].Date.getTime())) {
+                    this.isValidEventDate = false;
+                    break;
+                  }
+                }
+              }
+            if (this.isValidEventDate === true) {    
+                this.renderHeaderAndFooter(timelineData);
+                this.renderXandYAxis(minDate, maxDate, gWidth, gHeight);
+                this.renderTitle(vpWidth, gWidth);
+                this.renderLine(timelineData, gHeight);
+                this.renderArrow(timelineData);
+                this.renderBox(timelineData, gWidth, gHeight);
+                this.svg.append('rect')
+                    .attr('class', 'border-rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', vpWidth)
+                    .attr('height', vpHeight + 10)
+                    .attr('stroke-width', '2px')
+                    .attr('stroke', '#333')
+                    .attr('fill', 'transparent');
+                this.events.renderingFinished(options);
+            }
         }
     }
 
