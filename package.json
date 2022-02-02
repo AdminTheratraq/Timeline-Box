@@ -20,7 +20,7 @@
     "powerbi-visuals-api": "^2.6.2",
     "powerbi-visuals-utils-dataviewutils": "^2.2.0",
     "regenerator-runtime": "^0.13.7",
-    "sanitize-html": "^2.4.0",
+    "sanitize-html": "^2.6.1",
     "valid-data-url": "^3.0.0"
   },
   "devDependencies": {
