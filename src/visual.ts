@@ -405,7 +405,6 @@ export class Visual implements IVisual {
             });
 
         gbox.append('a')
-            .attr('xlink:href', (d, i) => { return d.DocumentLink; })
             .attr("target", "_blank")
             .append("rect")
             .attr("width", () => { return 110; })
@@ -419,8 +418,9 @@ export class Visual implements IVisual {
             .text((d) => { return _self.extractContent(sanitizeHtml(d.Description)); })
             .attr('x', '5')
             .attr('y', '0')
+            .attr('style', 'text-anchor: middle')
             .attr('fill', '#ffffff')
-            .attr('transform', 'translate(10,30)')
+            .attr('transform', 'translate(48,33)')
             .call(this.wrap, 90)
             .on('click', (e) => { _self.host.launchUrl(e.DocumentLink); });
         
